@@ -1,56 +1,604 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>Calculateur TikTok</title>
-<style>
-body { font-family: Arial; padding: 20px; }
-input { margin-bottom: 10px; width: 100%; padding: 6px; }
-</style>
-</head>
-<body>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Calculateur TikTok — Récompense</title>
 
-<h2>Calculateur de récompense</h2>
+  <style>
+    :root{
+      --bg: #ffffff;
+      --ink: #121212;
+      --muted: rgba(18,18,18,.65);
 
-<label>Jours :</label>
-<input type="number" id="jours" oninput="calculer()">
+      /* palette inspirée de ta DA (or/brun) */
+      --gold: #caa44a;
+      --gold-2:#b58f36;
+      --brown:#6b4b1f;
 
-<label>Heures :</label>
-<input type="number" id="heures" oninput="calculer()">
+      --card: rgba(255,255,255,.92);
+      --line: rgba(18,18,18,.12);
 
-<label>Diamants :</label>
-<input type="number" id="diamants" oninput="calculer()">
-
-<p>
-Palier : <strong id="palier">Aucun</strong><br>
-Récompense : <strong id="resultat">0</strong>
-</p>
-
-<script>
-function calculer() {
-    const jours = Number(document.getElementById("jours").value) || 0;
-    const heures = Number(document.getElementById("heures").value) || 0;
-    const diamants = Number(document.getElementById("diamants").value) || 0;
-
-    let taux = 0;
-    let palier = "Aucun";
-
-    if (jours >= 22 && heures >= 60 && diamants >= 500000) {
-        taux = 3.5;
-        palier = "Palier 3";
-    } else if (jours >= 15 && heures >= 40 && diamants >= 150000) {
-        taux = 3;
-        palier = "Palier 2";
-    } else if (jours >= 12 && heures >= 25 && diamants >= 75000) {
-        taux = 2;
-        palier = "Palier 1";
+      --shadow: 0 20px 50px rgba(0,0,0,.10);
+      --radius: 18px;
     }
 
-    document.getElementById("palier").textContent = palier;
-    document.getElementById("resultat").textContent =
-        Math.floor(diamants * taux / 100);
-}
-</script>
+    *{ box-sizing: border-box; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 700px at 50% 10%, rgba(202,164,74,.18), transparent 55%),
+        radial-gradient(900px 500px at 80% 50%, rgba(107,75,31,.10), transparent 60%),
+        var(--bg);
+      min-height: 100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 28px 16px;
+    }
 
+    .wrap{
+      width:min(980px, 100%);
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 18px;
+    }
+
+    @media (max-width: 900px){
+      .wrap{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+
+    .header{
+      padding: 18px 18px 14px;
+      border-bottom: 1px solid var(--line);
+      background:
+        linear-gradient(135deg, rgba(202,164,74,.22), rgba(107,75,31,.08));
+    }
+    .header h1{
+      margin:0;
+      font-size: 20px;
+      letter-spacing: .2px;
+    }
+    .header p{
+      margin:6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .content{ padding: 18px; }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 650px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .field{
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      background: rgba(255,255,255,.85);
+    }
+    .field label{
+      display:flex;
+      justify-content:space-between;
+      gap: 10px;
+      font-weight: 650;
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+    .field .hint{
+      font-weight: 500;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .inputRow{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+    }
+
+    input[type="number"]{
+      width: 130px;
+      max-width: 45%;
+      padding: 10px 10px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      outline: none;
+      font-size: 14px;
+      background: #fff;
+    }
+
+    input[type="range"]{
+      width: 100%;
+      accent-color: var(--gold);
+    }
+
+    .actions{
+      display:flex;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    button{
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 650;
+      transition: .15s ease;
+    }
+    button:hover{ transform: translateY(-1px); box-shadow: 0 10px 22px rgba(0,0,0,.08); }
+    .primary{
+      border-color: rgba(202,164,74,.55);
+      background: linear-gradient(135deg, rgba(202,164,74,.35), rgba(181,143,54,.22));
+    }
+
+    /* panneau résultat */
+    .result{
+      padding: 18px;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.85);
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .dot{
+      width:10px; height:10px; border-radius:50%;
+      background: rgba(18,18,18,.25);
+    }
+    .dot.p1{ background: rgba(202,164,74,.70); }
+    .dot.p2{ background: rgba(202,164,74,.92); }
+    .dot.p3{ background: #6b4b1f; }
+
+    .big{
+      margin-top: 14px;
+      border-radius: 18px;
+      padding: 16px;
+      background:
+        radial-gradient(800px 300px at 0% 0%, rgba(202,164,74,.18), transparent 60%),
+        rgba(255,255,255,.9);
+      border: 1px solid var(--line);
+    }
+    .big .label{
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    .big .value{
+      font-size: 34px;
+      font-weight: 850;
+      letter-spacing: .2px;
+    }
+    .big .sub{
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .progressBox{
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px;
+      background: rgba(255,255,255,.85);
+    }
+    .progressBox .title{
+      display:flex;
+      justify-content:space-between;
+      gap: 10px;
+      font-weight: 750;
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+    .bar{
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(18,18,18,.08);
+      overflow:hidden;
+    }
+    .bar > div{
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, rgba(202,164,74,.95), rgba(107,75,31,.85));
+    }
+    .need{
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .tiers{
+      margin-top: 14px;
+      border-top: 1px solid var(--line);
+      padding-top: 14px;
+    }
+    .tiers h3{
+      margin: 0 0 10px;
+      font-size: 14px;
+      letter-spacing: .2px;
+    }
+    .tierTable{
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .tierTable th, .tierTable td{
+      text-align: left;
+      padding: 10px 8px;
+      border-bottom: 1px solid rgba(18,18,18,.10);
+      vertical-align: top;
+    }
+    .tierTable th{ color: var(--muted); font-weight: 700; }
+    .tierTable tr.active{
+      background: rgba(202,164,74,.12);
+      outline: 1px solid rgba(202,164,74,.25);
+      outline-offset: -1px;
+    }
+
+    .note{
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .mono{
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <!-- INPUTS -->
+    <section class="card" aria-label="Calculateur">
+      <div class="header">
+        <h1>Calculateur de récompense</h1>
+        <p>Renseigne tes stats : le palier est détecté automatiquement et la récompense est calculée en direct.</p>
+      </div>
+
+      <div class="content">
+        <div class="grid">
+
+          <div class="field">
+            <label>
+              <span>Jours <span class="hint">(objectif selon palier)</span></span>
+              <span class="hint mono" id="joursLabel">0</span>
+            </label>
+            <div class="inputRow">
+              <input type="number" id="jours" min="0" step="1" value="0" inputmode="numeric" />
+              <input type="range" id="joursRange" min="0" max="31" step="1" value="0" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label>
+              <span>Heures <span class="hint">(objectif selon palier)</span></span>
+              <span class="hint mono" id="heuresLabel">0</span>
+            </label>
+            <div class="inputRow">
+              <input type="number" id="heures" min="0" step="1" value="0" inputmode="numeric" />
+              <input type="range" id="heuresRange" min="0" max="120" step="1" value="0" />
+            </div>
+          </div>
+
+          <div class="field" style="grid-column: 1 / -1;">
+            <label>
+              <span>Diamants <span class="hint">(ex : 150000)</span></span>
+              <span class="hint mono" id="diamantsLabel">0</span>
+            </label>
+            <div class="inputRow">
+              <input type="number" id="diamants" min="0" step="100" value="0" inputmode="numeric" style="width: 180px; max-width: 55%;" />
+              <input type="range" id="diamantsRange" min="0" max="600000" step="100" value="0" />
+            </div>
+          </div>
+
+        </div>
+
+        <div class="actions">
+          <button class="primary" type="button" id="fillP1">Remplir Palier 1</button>
+          <button type="button" id="fillP2">Remplir Palier 2</button>
+          <button type="button" id="fillP3">Remplir Palier 3</button>
+          <button type="button" id="reset">Réinitialiser</button>
+        </div>
+
+        <div class="note">
+          ⚠️ Le calcul ci-dessous reprend ta logique actuelle : <span class="mono">récompense = ⌊diamants × taux / 100⌋</span>.
+          Si ton taux représente autre chose (ex : euros par diamant), dis-moi et je l’adapte.
+        </div>
+      </div>
+    </section>
+
+    <!-- RESULTS -->
+    <aside class="card" aria-label="Résultats">
+      <div class="header">
+        <h1>Résultat</h1>
+        <p>Palier atteint, estimation de récompense, et progression vers le palier suivant.</p>
+      </div>
+
+      <div class="result">
+        <div class="pill" title="Palier détecté">
+          <span class="dot" id="dot"></span>
+          <span id="palier">Aucun palier</span>
+        </div>
+
+        <div class="big">
+          <div class="label">Récompense estimée</div>
+          <div class="value mono" id="resultat">0</div>
+          <div class="sub" id="tauxTxt">Taux appliqué : 0%</div>
+        </div>
+
+        <div class="progressBox">
+          <div class="title">
+            <span id="nextTitle">Prochain palier</span>
+            <span class="mono" id="progressPct">0%</span>
+          </div>
+          <div class="bar"><div id="barFill"></div></div>
+          <div class="need" id="needTxt">Entre tes valeurs pour voir ce qu’il manque.</div>
+        </div>
+
+        <div class="tiers">
+          <h3>Paliers</h3>
+          <table class="tierTable" aria-label="Table des paliers">
+            <thead>
+              <tr>
+                <th>Palier</th>
+                <th>Conditions</th>
+                <th>Taux</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr id="rowP1">
+                <td><strong>Palier 1</strong></td>
+                <td>12 jours • 25 h • 75 000 diamants</td>
+                <td>2%</td>
+              </tr>
+              <tr id="rowP2">
+                <td><strong>Palier 2</strong></td>
+                <td>15 jours • 40 h • 150 000 diamants</td>
+                <td>3%</td>
+              </tr>
+              <tr id="rowP3">
+                <td><strong>Palier 3</strong></td>
+                <td>22 jours • 60 h • 500 000 diamants</td>
+                <td>3,5%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <script>
+    // --- paliers (ta logique, rendue plus lisible) ---
+    const TIERS = [
+      { id: "P1", name: "Palier 1", jours: 12, heures: 25, diamants: 75000, taux: 2 },
+      { id: "P2", name: "Palier 2", jours: 15, heures: 40, diamants: 150000, taux: 3 },
+      { id: "P3", name: "Palier 3", jours: 22, heures: 60, diamants: 500000, taux: 3.5 }
+    ];
+
+    // --- éléments ---
+    const el = (id) => document.getElementById(id);
+
+    const jours = el("jours");
+    const heures = el("heures");
+    const diamants = el("diamants");
+
+    const joursRange = el("joursRange");
+    const heuresRange = el("heuresRange");
+    const diamantsRange = el("diamantsRange");
+
+    const joursLabel = el("joursLabel");
+    const heuresLabel = el("heuresLabel");
+    const diamantsLabel = el("diamantsLabel");
+
+    const palierEl = el("palier");
+    const resultatEl = el("resultat");
+    const tauxTxt = el("tauxTxt");
+
+    const dot = el("dot");
+    const barFill = el("barFill");
+    const progressPct = el("progressPct");
+    const needTxt = el("needTxt");
+    const nextTitle = el("nextTitle");
+
+    const rowP1 = el("rowP1");
+    const rowP2 = el("rowP2");
+    const rowP3 = el("rowP3");
+
+    // --- helpers ---
+    const nf = new Intl.NumberFormat("fr-FR");
+    const clamp0 = (n) => Number.isFinite(n) ? Math.max(0, n) : 0;
+
+    function getValues(){
+      return {
+        j: clamp0(Number(jours.value) || 0),
+        h: clamp0(Number(heures.value) || 0),
+        d: clamp0(Number(diamants.value) || 0)
+      };
+    }
+
+    function tierReached(t, v){
+      return v.j >= t.jours && v.h >= t.heures && v.d >= t.diamants;
+    }
+
+    function computeTier(v){
+      // priorité au plus haut palier atteint
+      for (let i = TIERS.length - 1; i >= 0; i--){
+        if (tierReached(TIERS[i], v)) return TIERS[i];
+      }
+      return null;
+    }
+
+    function nextTier(v){
+      for (let i = 0; i < TIERS.length; i++){
+        if (!tierReached(TIERS[i], v)) return TIERS[i];
+      }
+      return null;
+    }
+
+    function progressToTier(t, v){
+      // progression moyenne sur 3 critères (0..1)
+      const pj = Math.min(1, v.j / t.jours);
+      const ph = Math.min(1, v.h / t.heures);
+      const pd = Math.min(1, v.d / t.diamants);
+      return (pj + ph + pd) / 3;
+    }
+
+    function missingText(t, v){
+      const mj = Math.max(0, t.jours - v.j);
+      const mh = Math.max(0, t.heures - v.h);
+      const md = Math.max(0, t.diamants - v.d);
+
+      const parts = [];
+      if (mj > 0) parts.push(`${nf.format(mj)} jour${mj>1?"s":""}`);
+      if (mh > 0) parts.push(`${nf.format(mh)} heure${mh>1?"s":""}`);
+      if (md > 0) parts.push(`${nf.format(md)} diamants`);
+
+      if (parts.length === 0) return "Palier atteint ✅";
+      return `Il te manque : ${parts.join(" • ")}.`;
+    }
+
+    function setActiveRow(tier){
+      [rowP1,rowP2,rowP3].forEach(r => r.classList.remove("active"));
+      if (!tier) return;
+      if (tier.id === "P1") rowP1.classList.add("active");
+      if (tier.id === "P2") rowP2.classList.add("active");
+      if (tier.id === "P3") rowP3.classList.add("active");
+    }
+
+    function setDot(tier){
+      dot.className = "dot";
+      if (!tier) return;
+      if (tier.id === "P1") dot.classList.add("p1");
+      if (tier.id === "P2") dot.classList.add("p2");
+      if (tier.id === "P3") dot.classList.add("p3");
+    }
+
+    // --- sync number <-> range ---
+    function syncFromNumbers(){
+      const v = getValues();
+      joursRange.value = v.j;
+      heuresRange.value = v.h;
+      diamantsRange.value = v.d;
+
+      joursLabel.textContent = nf.format(v.j);
+      heuresLabel.textContent = nf.format(v.h);
+      diamantsLabel.textContent = nf.format(v.d);
+
+      calculer();
+    }
+
+    function syncFromRanges(){
+      jours.value = Number(joursRange.value);
+      heures.value = Number(heuresRange.value);
+      diamants.value = Number(diamantsRange.value);
+      syncFromNumbers();
+    }
+
+    // --- calcul principal ---
+    function calculer(){
+      const v = getValues();
+      const tier = computeTier(v);
+
+      let taux = 0;
+      let palier = "Aucun palier";
+
+      if (tier){
+        taux = tier.taux;
+        palier = tier.name;
+      }
+
+      palierEl.textContent = palier;
+      tauxTxt.textContent = `Taux appliqué : ${String(taux).replace(".", ",")}%`;
+
+      // ta formule, conservée
+      const reward = Math.floor(v.d * taux / 100);
+      resultatEl.textContent = nf.format(reward);
+
+      // table + dot
+      setActiveRow(tier);
+      setDot(tier);
+
+      // progression prochain palier
+      const nxt = nextTier(v);
+      if (!nxt){
+        nextTitle.textContent = "Prochain palier";
+        progressPct.textContent = "100%";
+        barFill.style.width = "100%";
+        needTxt.textContent = "Tu as atteint le palier le plus élevé 🎉";
+        return;
+      }
+
+      nextTitle.textContent = `Vers ${nxt.name}`;
+      const p = progressToTier(nxt, v);
+      const pct = Math.round(p * 100);
+      progressPct.textContent = `${pct}%`;
+      barFill.style.width = `${pct}%`;
+      needTxt.textContent = missingText(nxt, v);
+    }
+
+    // --- events ---
+    [jours, heures, diamants].forEach(inp => {
+      inp.addEventListener("input", syncFromNumbers);
+    });
+    [joursRange, heuresRange, diamantsRange].forEach(r => {
+      r.addEventListener("input", syncFromRanges);
+    });
+
+    // presets & reset
+    el("fillP1").addEventListener("click", () => {
+      jours.value = 12; heures.value = 25; diamants.value = 75000;
+      syncFromNumbers();
+    });
+    el("fillP2").addEventListener("click", () => {
+      jours.value = 15; heures.value = 40; diamants.value = 150000;
+      syncFromNumbers();
+    });
+    el("fillP3").addEventListener("click", () => {
+      jours.value = 22; heures.value = 60; diamants.value = 500000;
+      syncFromNumbers();
+    });
+    el("reset").addEventListener("click", () => {
+      jours.value = 0; heures.value = 0; diamants.value = 0;
+      syncFromNumbers();
+    });
+
+    // init
+    syncFromNumbers();
+  </script>
 </body>
 </html>
+
