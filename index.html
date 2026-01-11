@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Calculateur TikTok</title>
+<style>
+body { font-family: Arial; padding: 20px; }
+input { margin-bottom: 10px; width: 100%; padding: 6px; }
+</style>
+</head>
+<body>
+
+<h2>Calculateur de récompense</h2>
+
+<label>Jours :</label>
+<input type="number" id="jours" oninput="calculer()">
+
+<label>Heures :</label>
+<input type="number" id="heures" oninput="calculer()">
+
+<label>Diamants :</label>
+<input type="number" id="diamants" oninput="calculer()">
+
+<p>
+Palier : <strong id="palier">Aucun</strong><br>
+Récompense : <strong id="resultat">0</strong>
+</p>
+
+<script>
+function calculer() {
+    const jours = Number(document.getElementById("jours").value) || 0;
+    const heures = Number(document.getElementById("heures").value) || 0;
+    const diamants = Number(document.getElementById("diamants").value) || 0;
+
+    let taux = 0;
+    let palier = "Aucun";
+
+    if (jours >= 22 && heures >= 60 && diamants >= 500000) {
+        taux = 3.5;
+        palier = "Palier 3";
+    } else if (jours >= 15 && heures >= 40 && diamants >= 150000) {
+        taux = 3;
+        palier = "Palier 2";
+    } else if (jours >= 12 && heures >= 25 && diamants >= 75000) {
+        taux = 2;
+        palier = "Palier 1";
+    }
+
+    document.getElementById("palier").textContent = palier;
+    document.getElementById("resultat").textContent =
+        Math.floor(diamants * taux / 100);
+}
+</script>
+
+</body>
+</html>
