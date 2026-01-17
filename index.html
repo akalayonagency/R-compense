@@ -4,61 +4,239 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Calculateur TikTok</title>
+
   <style>
     :root{
-      --ink:#111; --muted:#666; --line:#e7e7e7;
-      --gold:#caa44a; --gold2:#b58f36; --bg:#fff;
-      --radius:16px;
+      --ink:#111;
+      --muted:#6b6b6b;
+      --line:#e9e9e9;
+
+      --gold:#caa44a;
+      --gold2:#b58f36;
+
+      --card:#ffffff;
+      --bg:transparent;
+
+      --r:16px;
+      --shadow: 0 12px 28px rgba(0,0,0,.10);
     }
-    body{ font-family: Arial, system-ui, sans-serif; margin:0; background:var(--bg); color:var(--ink); }
-    .wrap{ max-width:900px; margin:40px auto; padding:0 16px; }
+
+    /* ✅ Important si tu l’embed dans une page existante */
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: Arial, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      color:var(--ink);
+      background:var(--bg);
+    }
+
+    /* ✅ Conteneur "section" : prend toute la largeur disponible */
+    .calc{
+      width:100%;
+      padding:12px;                 /* petit padding pour respirer */
+      box-sizing:border-box;
+    }
+
+    /* ✅ Carte: full width, mais tu peux limiter si tu veux */
     .card{
-      border:1px solid var(--line); border-radius:var(--radius);
-      box-shadow:0 18px 40px rgba(0,0,0,.08); overflow:hidden;
-      background:linear-gradient(135deg, rgba(202,164,74,.18), rgba(181,143,54,.06));
+      width:100%;
+      max-width: 980px;             /* enlève si tu veux 100% full */
+      margin:0 auto;                /* centre dans la page/section */
+      border:1px solid var(--line);
+      border-radius: var(--r);
+      overflow:hidden;
+      background: linear-gradient(135deg, rgba(202,164,74,.16), rgba(181,143,54,.05));
+      box-shadow: var(--shadow);
     }
-    header{ padding:18px; border-bottom:1px solid var(--line); background:rgba(255,255,255,.85); }
-    header h1{ margin:0; font-size:18px; }
-    header p{ margin:6px 0 0; color:var(--muted); font-size:13px; line-height:1.4; }
 
-    .content{ padding:18px; background:rgba(255,255,255,.92); }
-    .row{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px; }
-    @media (max-width: 720px){ .row{ grid-template-columns:1fr; } }
+    header{
+      padding:14px 16px;
+      border-bottom:1px solid var(--line);
+      background: rgba(255,255,255,.9);
+    }
+    header h1{
+      margin:0;
+      font-size:16px;
+      line-height:1.2;
+    }
+    header p{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.35;
+    }
 
-    .field{ border:1px solid var(--line); border-radius:14px; padding:12px; background:#fff; }
-    .field label{ display:flex; justify-content:space-between; font-weight:700; font-size:13px; margin-bottom:8px; }
-    .field small{ color:var(--muted); font-weight:500; }
+    .content{
+      padding:14px 16px 16px;
+      background: rgba(255,255,255,.92);
+    }
+
+    /* ✅ Layout ergonomique : champs + résultat */
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:12px;
+      align-items:start;
+    }
+    @media (max-width: 860px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    /* ✅ Champs en 3 colonnes, puis 2, puis 1 */
+    .row{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap:10px;
+    }
+    @media (max-width: 720px){
+      .row{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 460px){
+      .row{ grid-template-columns: 1fr; }
+    }
+
+    .field{
+      border:1px solid var(--line);
+      border-radius: 14px;
+      padding:10px;
+      background: var(--card);
+    }
+
+    .field label{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:10px;
+      font-weight:800;
+      font-size:12px;
+      margin-bottom:8px;
+    }
+    .field small{
+      color:var(--muted);
+      font-weight:600;
+      font-size:11px;
+    }
+
     .input{
-      display:flex; gap:8px; align-items:center;
-      border:1px solid var(--line); border-radius:12px; padding:8px 10px;
-    }
-    .input input{
-      width:100%; border:0; outline:none; font-size:14px; background:transparent;
-    }
-    .unit{ color:var(--muted); font-size:13px; white-space:nowrap; }
-
-    .result{
-      margin-top:12px; border:1px solid var(--line); border-radius:14px; padding:14px; background:#fff;
-    }
-    .badge{
-      display:inline-flex; gap:8px; align-items:center;
-      border:1px solid var(--line); border-radius:999px; padding:6px 10px; font-weight:800; font-size:12px;
-      background:rgba(202,164,74,.10);
-    }
-    .big{ font-size:34px; font-weight:900; margin:10px 0 6px; }
-    .muted{ color:var(--muted); font-size:13px; line-height:1.4; }
-
-    .btns{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
-    button{
-      border:1px solid var(--line); border-radius:12px; padding:10px 12px; cursor:pointer; font-weight:800;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:8px 10px;
       background:#fff;
     }
-    .primary{ border-color:rgba(202,164,74,.55); background:linear-gradient(135deg, rgba(202,164,74,.35), rgba(181,143,54,.18)); }
+    .input input{
+      width:100%;
+      border:0;
+      outline:none;
+      font-size:14px;
+      background:transparent;
+      min-width:0;
+    }
+    .unit{
+      color:var(--muted);
+      font-size:13px;
+      white-space:nowrap;
+      user-select:none;
+    }
+
+    /* ✅ Résultat plus “dashboard” */
+    .result{
+      border:1px solid var(--line);
+      border-radius: 14px;
+      padding:12px;
+      background:#fff;
+      position:sticky;
+      top:12px; /* sur desktop, il “suit” un peu le scroll */
+    }
+    @media (max-width: 860px){
+      .result{ position:relative; top:auto; }
+    }
+
+    .topline{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:8px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(202,164,74,.35);
+      background: rgba(202,164,74,.12);
+      font-weight:900;
+      font-size:12px;
+    }
+
+    .rate{
+      color:var(--muted);
+      font-size:12px;
+      font-weight:700;
+    }
+
+    .big{
+      font-size:34px;
+      font-weight:900;
+      margin:6px 0 6px;
+      letter-spacing:-0.5px;
+      line-height:1;
+    }
+
+    .muted{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.35;
+    }
+
+    .hr{
+      height:1px;
+      background: var(--line);
+      margin:10px 0;
+    }
+
+    /* ✅ Boutons en grille : plus compact + mobile friendly */
+    .btns{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap:8px;
+      margin-top:10px;
+    }
+    @media (max-width: 520px){
+      .btns{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    button{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px 10px;
+      cursor:pointer;
+      font-weight:900;
+      background:#fff;
+      transition: transform .04s ease, border-color .12s ease, background .12s ease;
+    }
+    button:active{ transform: translateY(1px); }
+
+    .primary{
+      border-color: rgba(202,164,74,.55);
+      background: linear-gradient(135deg, rgba(202,164,74,.35), rgba(181,143,54,.18));
+    }
+
+    .ghost{
+      background:#fafafa;
+    }
   </style>
 </head>
 
 <body>
-  <div class="wrap">
+  <section class="calc">
     <div class="card">
       <header>
         <h1>Calculateur de récompense Layon Agency</h1>
@@ -66,89 +244,117 @@
       </header>
 
       <div class="content">
-        <div class="row">
-          <div class="field">
-            <label>Jours <small></small></label>
-            <div class="input">
-              <input type="number" id="jours" min="0" step="1" placeholder="0" />
-              <span class="unit">jours</span>
+        <div class="grid">
+          <!-- ✅ COLONNE GAUCHE -->
+          <div>
+            <div class="row">
+              <div class="field">
+                <label>Jours <small>jours valides</small></label>
+                <div class="input">
+                  <input type="number" id="jours" min="0" step="1" placeholder="0" inputmode="numeric" />
+                  <span class="unit">jours</span>
+                </div>
+              </div>
+
+              <div class="field">
+                <label>Heures <small>temps live</small></label>
+                <div class="input">
+                  <input type="number" id="heures" min="0" step="1" placeholder="0" inputmode="numeric" />
+                  <span class="unit">h</span>
+                </div>
+              </div>
+
+              <div class="field">
+                <label>Diamants <small>dans le mois</small></label>
+                <div class="input">
+                  <input type="number" id="diamants" min="0" step="100" placeholder="0" inputmode="numeric" />
+                  <span class="unit">💎</span>
+                </div>
+              </div>
             </div>
+
+            <p class="muted" style="margin:10px 2px 0;">
+              Astuce : tu peux utiliser les boutons “Palier” pour tester rapidement.
+            </p>
           </div>
 
-          <div class="field">
-            <label>Heures <small></small></label>
-            <div class="input">
-              <input type="number" id="heures" min="0" step="1" placeholder="0" />
-              <span class="unit">h</span>
+          <!-- ✅ COLONNE DROITE -->
+          <div class="result">
+            <div class="topline">
+              <div class="badge" id="palier">Aucun palier</div>
+              <div class="rate" id="rate">Taux : 0%</div>
             </div>
-          </div>
 
-          <div class="field">
-            <label>Diamants <small></small></label>
-            <div class="input">
-              <input type="number" id="diamants" min="0" step="100" placeholder="0" />
-              <span class="unit">💎</span>
+            <div class="big" id="resultat">0</div>
+            <div class="muted" id="details">Entre des valeurs pour voir l’estimation.</div>
+
+            <div class="hr"></div>
+
+            <div class="muted" id="manque"></div>
+
+            <div class="btns">
+              <button class="primary" id="p1">Palier 1</button>
+              <button id="p2">Palier 2</button>
+              <button id="p3">Palier 3</button>
+              <button class="ghost" id="reset">Reset</button>
             </div>
-          </div>
-        </div>
-
-        <div class="result">
-          <div class="badge" id="palier">Aucun palier</div>
-          <div class="big" id="resultat">0</div>
-          <div class="muted" id="details">Taux : 0% • Entre des valeurs pour voir l’estimation.</div>
-          <div class="muted" id="manque"></div>
-
-          <div class="btns">
-            <button class="primary" id="p1">Palier 1</button>
-            <button id="p2">Palier 2</button>
-            <button id="p3">Palier 3</button>
-            <button id="reset">Reset</button>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </section>
 
   <script>
     const nf = new Intl.NumberFormat("fr-FR");
 
     const tiers = [
-      { name:"Palier 1", j:12, h:25, d:75000, taux:2 },
-      { name:"Palier 2", j:15, h:40, d:150000, taux:3 },
+      { name:"Palier 1", j:12, h:25, d:75000,  taux:2   },
+      { name:"Palier 2", j:15, h:40, d:150000, taux:3   },
       { name:"Palier 3", j:22, h:60, d:500000, taux:3.5 }
     ];
 
     const $ = (id) => document.getElementById(id);
     const jours = $("jours"), heures = $("heures"), diamants = $("diamants");
-    const palierEl = $("palier"), resultatEl = $("resultat"), detailsEl = $("details"), manqueEl = $("manque");
+    const palierEl = $("palier"), resultatEl = $("resultat"), detailsEl = $("details");
+    const manqueEl = $("manque"), rateEl = $("rate");
 
     function v(){
       return {
-        j: Math.max(0, Number(jours.value)||0),
-        h: Math.max(0, Number(heures.value)||0),
-        d: Math.max(0, Number(diamants.value)||0),
+        j: Math.max(0, Number(jours.value) || 0),
+        h: Math.max(0, Number(heures.value) || 0),
+        d: Math.max(0, Number(diamants.value) || 0),
       };
     }
 
-    function atteint(t, x){ return x.j>=t.j && x.h>=t.h && x.d>=t.d; }
+    function atteint(t, x){ return x.j >= t.j && x.h >= t.h && x.d >= t.d; }
 
     function detecterPalier(x){
-      for(let i=tiers.length-1;i>=0;i--) if (atteint(tiers[i], x)) return tiers[i];
+      for(let i = tiers.length - 1; i >= 0; i--){
+        if (atteint(tiers[i], x)) return tiers[i];
+      }
       return null;
     }
 
     function prochainPalier(x){
-      for(const t of tiers) if(!atteint(t,x)) return t;
+      for(const t of tiers){
+        if(!atteint(t, x)) return t;
+      }
       return null;
     }
 
     function manquePour(t, x){
-      const mj=Math.max(0,t.j-x.j), mh=Math.max(0,t.h-x.h), md=Math.max(0,t.d-x.d);
-      const parts=[];
-      if(mj) parts.push(`${nf.format(mj)} jour${mj>1?"s":""}`);
-      if(mh) parts.push(`${nf.format(mh)} heure${mh>1?"s":""}`);
+      const mj = Math.max(0, t.j - x.j);
+      const mh = Math.max(0, t.h - x.h);
+      const md = Math.max(0, t.d - x.d);
+
+      const parts = [];
+      if(mj) parts.push(`${nf.format(mj)} jour${mj > 1 ? "s" : ""}`);
+      if(mh) parts.push(`${nf.format(mh)} heure${mh > 1 ? "s" : ""}`);
       if(md) parts.push(`${nf.format(md)} diamants`);
-      return parts.length ? `Pour ${t.name} : il manque ${parts.join(" • ")}.` : `Tu as atteint ${t.name} ✅`;
+
+      return parts.length
+        ? `Pour ${t.name} : il manque ${parts.join(" • ")}.`
+        : `Tu as atteint ${t.name} ✅`;
     }
 
     function calculer(){
@@ -157,10 +363,14 @@
 
       const taux = t ? t.taux : 0;
       palierEl.textContent = t ? t.name : "Aucun palier";
+      rateEl.textContent = `Taux : ${String(taux).replace(".", ",")}%`;
+
       const reward = Math.floor(x.d * taux / 100);
       resultatEl.textContent = nf.format(reward);
 
-      detailsEl.textContent = `Taux : ${String(taux).replace(".",",")}% • Formule : ⌊diamants × taux / 100⌋`;
+      detailsEl.textContent = t
+        ? `Formule : ⌊diamants × taux / 100⌋`
+        : `Entre des valeurs pour voir l’estimation.`;
 
       const next = prochainPalier(x);
       manqueEl.textContent = next ? manquePour(next, x) : "Palier max atteint 🎉";
@@ -168,7 +378,7 @@
 
     [jours, heures, diamants].forEach(inp => inp.addEventListener("input", calculer));
 
-    $("p1").onclick = () => (jours.value=12, heures.value=25, diamants.value=75000, calculer());
+    $("p1").onclick = () => (jours.value=12, heures.value=25, diamants.value=75000,  calculer());
     $("p2").onclick = () => (jours.value=15, heures.value=40, diamants.value=150000, calculer());
     $("p3").onclick = () => (jours.value=22, heures.value=60, diamants.value=500000, calculer());
     $("reset").onclick = () => (jours.value="", heures.value="", diamants.value="", calculer());
@@ -178,6 +388,4 @@
 </body>
 </html>
 
-</body>
-</html>
 
